@@ -1,5 +1,4 @@
 import type { BasePalette, ProjectColors, ColorScale } from '../types/index.js';
-import { hexToRgb } from './color-utils.js';
 
 // CSS 변수 형태로 출력
 export function exportToCSS(palette: BasePalette, projectColors?: ProjectColors): string {
@@ -10,8 +9,7 @@ export function exportToCSS(palette: BasePalette, projectColors?: ProjectColors)
     lines.push(`  /* ${colorName.charAt(0).toUpperCase() + colorName.slice(1)} colors */`);
     
     for (const [step, color] of Object.entries(scale as ColorScale)) {
-      const rgb = hexToRgb(color);
-      lines.push(`  --color-${colorName}-${step}: ${rgb.r} ${rgb.g} ${rgb.b};`);
+      lines.push(`  --color-${colorName}-${step}: ${color};`);
     }
     lines.push('');
   }
@@ -46,8 +44,7 @@ export function exportToCSS(palette: BasePalette, projectColors?: ProjectColors)
   if (projectColors) {
     lines.push('  /* Project-specific colors */');
     for (const [name, color] of Object.entries(projectColors)) {
-      const rgb = hexToRgb(color);
-      lines.push(`  --color-${name}: ${rgb.r} ${rgb.g} ${rgb.b};`);
+      lines.push(`  --color-${name}: ${color};`);
     }
     lines.push('');
   }
@@ -200,21 +197,15 @@ export function exportToReactNative(palette: BasePalette, projectColors?: Projec
 export function exportToDynamicCSS(colors: Record<string, string>, primaryColor: string): string {
   let css = `:root {\n`;
   
-  // 동적 색상들을 CSS 변수로 변환
+  // 동적 색상들을 CSS 변수로 변환 (헥스 코드 직접 사용)
   for (const [name, color] of Object.entries(colors)) {
-    const { r, g, b } = hexToRgb(color);
-    css += `  --color-${name}: ${r} ${g} ${b};\n`;
-  }
-  
-  css += `\n  /* RGB 헥스 값들 */\n`;
-  for (const [name, color] of Object.entries(colors)) {
-    css += `  --color-${name}-hex: ${color};\n`;
+    css += `  --color-${name}: ${color};\n`;
   }
   
   css += `}\n\n`;
   css += `/* 사용 예시:\n`;
-  css += ` * background-color: rgb(var(--color-${Object.keys(colors)[0] || 'primary'}));\n`;
-  css += ` * color: var(--color-${Object.keys(colors)[1] || 'text'}-hex);\n`;
+  css += ` * background-color: var(--color-${Object.keys(colors)[0] || 'primary'});\n`;
+  css += ` * color: var(--color-${Object.keys(colors)[1] || 'text'});\n`;
   css += ` */`;
   
   return css;
