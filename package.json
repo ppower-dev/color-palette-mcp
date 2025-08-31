@@ -1,0 +1,52 @@
+{
+  "name": "color-palette-mcp",
+  "version": "0.1.0",
+  "description": "MCP server for intelligent color palette generation and management",
+  "license": "MIT",
+  "author": "ppower-dev",
+  "homepage": "https://github.com/ppower-dev/color-palette-mcp",
+  "bugs": "https://github.com/ppower-dev/color-palette-mcp/issues",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ppower-dev/color-palette-mcp.git"
+  },
+  "type": "module",
+  "bin": {
+    "color-palette-mcp": "dist/index.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc && shx chmod +x dist/*.js",
+    "prepare": "npm run build",
+    "watch": "tsc --watch",
+    "test": "jest --config=jest.config.cjs --coverage",
+    "dev": "tsx watch src/index.ts"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.17.0",
+    "zod": "^3.22.0",
+    "zod-to-json-schema": "^3.23.5"
+  },
+  "devDependencies": {
+    "@jest/globals": "^29.7.0",
+    "@types/jest": "^29.5.14",
+    "@types/node": "^22",
+    "jest": "^29.7.0",
+    "shx": "^0.3.4",
+    "ts-jest": "^29.1.1",
+    "tsx": "^4.7.0",
+    "typescript": "^5.8.2"
+  },
+  "keywords": [
+    "mcp",
+    "color",
+    "palette",
+    "design-system",
+    "css",
+    "frontend",
+    "accessibility",
+    "tailwind"
+  ]
+}
