@@ -12,9 +12,9 @@ import { zodToJsonSchema } from "zod-to-json-schema";
 
 // 내부 모듈들
 import { generateBasePalette } from './lib/palette-generator.js';
-import { generateProjectColors } from './lib/project-colors.js';
+import { generateProjectColors, generateDynamicProjectColors } from './lib/project-colors.js';
 import { validateAccessibility, validatePaletteAccessibility } from './lib/accessibility.js';
-import { exportToCSS, exportToTailwind, exportToSCSS, exportToFigma, exportToReactNative } from './lib/exporters.js';
+import { exportToCSS, exportToTailwind, exportToSCSS, exportToFigma, exportToReactNative, exportToDynamicCSS, exportToDynamicTailwind, exportToDynamicSCSS, exportToDynamicFigma, exportToDynamicReactNative } from './lib/exporters.js';
 import { extractColorsFromCSS } from './lib/color-utils.js';
 import type { PaletteResult, OutputFormat, ProjectType, PaletteStyle } from './types/index.js';
 
@@ -52,6 +52,13 @@ const PreviewPaletteSchema = z.object({
   primaryColor: z.string().regex(/^#[0-9A-Fa-f]{3,6}$/, 'Valid hex color required'),
   style: z.enum(['modern', 'vibrant', 'muted', 'minimal']).default('modern'),
   components: z.array(z.enum(['button', 'card', 'form', 'navigation', 'all'])).default(['button', 'card'])
+});
+
+const GenerateDynamicColorsSchema = z.object({
+  projectDescription: z.string().min(5, 'Project description must be at least 5 characters'),
+  primaryColor: z.string().regex(/^#[0-9A-Fa-f]{3,6}$/, 'Valid hex color required'),
+  maxColors: z.number().min(1).max(30).default(15),
+  format: z.enum(['css', 'tailwind', 'scss', 'figma', 'react-native']).default('css')
 });
 
 // 서버 설정
@@ -95,6 +102,11 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
         name: "preview_palette",
         description: "생성된 팔레트를 적용한 샘플 UI를 HTML로 생성합니다. 실제 적용 결과를 미리 볼 수 있습니다.",
         inputSchema: zodToJsonSchema(PreviewPaletteSchema) as Tool["inputSchema"],
+      },
+      {
+        name: "generate_dynamic_colors",
+        description: "자연어 프로젝트 설명을 분석하여 맞춤형 색상 변수를 자동 생성합니다. 어떤 종류의 프로젝트든 상관없이 AI가 적절한 색상을 추론해서 생성합니다.",
+        inputSchema: zodToJsonSchema(GenerateDynamicColorsSchema) as Tool["inputSchema"],
       }
     ],
   };
@@ -249,6 +261,53 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           content: [{ 
             type: "text", 
             text: `🎭 팔레트 미리보기 HTML이 생성되었습니다:\n\n${html}` 
+          }],
+        };
+      }
+
+      case "generate_dynamic_colors": {
+        const parsed = GenerateDynamicColorsSchema.safeParse(args);
+        if (!parsed.success) {
+          throw new Error(`Invalid arguments: ${parsed.error.message}`);
+        }
+
+        const { projectDescription, primaryColor, maxColors, format } = parsed.data;
+        
+        // 동적 색상 생성
+        const dynamicColors = generateDynamicProjectColors(
+          projectDescription, 
+          primaryColor, 
+          maxColors
+        );
+
+        // 선택된 포맷으로 내보내기
+        let exportedResult: string;
+        switch (format) {
+          case 'css':
+            exportedResult = exportToDynamicCSS(dynamicColors, primaryColor);
+            break;
+          case 'tailwind':
+            exportedResult = exportToDynamicTailwind(dynamicColors);
+            break;
+          case 'scss':
+            exportedResult = exportToDynamicSCSS(dynamicColors);
+            break;
+          case 'figma':
+            exportedResult = exportToDynamicFigma(dynamicColors);
+            break;
+          case 'react-native':
+            exportedResult = exportToDynamicReactNative(dynamicColors);
+            break;
+          default:
+            exportedResult = exportToDynamicCSS(dynamicColors, primaryColor);
+        }
+
+        const colorCount = Object.keys(dynamicColors).length;
+
+        return {
+          content: [{ 
+            type: "text", 
+            text: `🤖 AI가 "${projectDescription}" 분석 결과 ${colorCount}개의 맞춤 색상을 생성했습니다!\n\n${exportedResult}` 
           }],
         };
       }

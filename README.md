@@ -7,6 +7,7 @@
 ## 주요 기능
 
 - **브랜드 컬러 기반 팔레트 생성**: 하나의 헥스 코드로 50~900 스케일의 체계적인 색상 팔레트 생성
+- **🤖 AI 동적 색상 생성**: 자연어 프로젝트 설명만으로 맞춤형 색상 변수 자동 생성
 - **프로젝트별 맞춤 색상**: 이커머스, 대시보드, WebRTC, 블로그 등 용도별 전용 컬러 제공
 - **접근성 검증**: WCAG AA/AAA 기준 대비율 체크 및 개선 방안 제시
 - **다양한 포맷 지원**: CSS Variables, Tailwind Config, SCSS, Figma Tokens, React Native 출력
@@ -19,21 +20,50 @@
 ```bash
 npm install -g color-palette-mcp
 ```
+설치 완료 후 올바른 설정 경로가 자동으로 표시됩니다! 📋
 
 ### 2. Claude Desktop 연결
 Claude Desktop 설정 파일을 수정하세요:
 
 **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`  
-**Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
+**Windows**: `%APPDATA%\Claude\claude_desktop_config.json`  
+**Linux**: `~/.config/Claude/claude_desktop_config.json`
 
+#### 방법 1: 절대 경로 사용 (권장 ✅)
+설치 후 표시되는 절대 경로를 사용:
 ```json
 {
   "mcpServers": {
     "color-palette": {
-      "command": "color-palette-mcp"
+      "command": "/your/npm/global/bin/color-palette-mcp"
     }
   }
 }
+```
+
+#### 방법 2: npx 사용 (간편함 ⚡)
+```json
+{
+  "mcpServers": {
+    "color-palette": {
+      "command": "npx",
+      "args": ["color-palette-mcp"]
+    }
+  }
+}
+```
+
+### 설정 경로 찾기 💡
+올바른 경로를 찾으려면:
+```bash
+# macOS/Linux
+which color-palette-mcp
+
+# Windows  
+where color-palette-mcp
+
+# npm 전역 경로 확인
+npm config get prefix
 ```
 
 설정 후 Claude Desktop을 재시작하면 색상 팔레트 도구들이 활성화됩니다.
@@ -70,6 +100,21 @@ Cursor에서 사용하려면 Cursor 설정에서 MCP 서버를 추가하세요:
 ### 프로젝트별 확장 팔레트
 ```
 #22c55e 색상으로 이커머스 프로젝트용 팔레트 생성해줘 (할인가격, 재고상태 색상 포함)
+```
+
+### 🤖 AI 동적 색상 생성 (NEW!)
+어떤 종류의 프로젝트든 자연어로 설명하면 AI가 맞춤 색상을 자동 생성합니다:
+
+```
+"의료진 전용 병원 관리 시스템을 만들고 있어. 응급상황, 수술실 상태, 환자 중증도, 의료진 역할별 구분이 필요해"
+```
+
+```
+"암호화폐 거래소 대시보드야. 상승/하락, 매수/매도, 위험도, 알람 등급, 지갑 상태 색상이 필요해"
+```
+
+```  
+"게임 길드 관리 툴이야. 플레이어 등급, 퀘스트 상태, 아이템 희귀도, PvP 순위, 길드 랭킹 색상 만들어줘"
 ```
 
 ### 포맷 지정 출력
@@ -207,14 +252,56 @@ npm run dev       # 개발 서버 실행
 
 ## 문제해결
 
-### MCP 서버가 인식되지 않는 경우
-1. Claude Desktop/Cursor 재시작
-2. 설정 파일 경로 확인
-3. `npm list -g color-palette-mcp`로 전역 설치 확인
+### ❌ "서버를 찾을 수 없습니다" 오류
+**증상**: `spawn color-palette-mcp ENOENT` 또는 서버 연결 실패
 
-### 색상이 제대로 생성되지 않는 경우
-- 헥스 코드 형식 확인 (#000000 형태)
+**해결방법**:
+1. **절대 경로 확인**: 
+   ```bash
+   which color-palette-mcp
+   # 또는 npm config get prefix
+   ```
+   결과를 설정 파일의 `command`에 정확히 입력
+
+2. **npx 방법 사용**:
+   ```json
+   {
+     "mcpServers": {
+       "color-palette": {
+         "command": "npx",
+         "args": ["color-palette-mcp"]
+       }
+     }
+   }
+   ```
+
+3. **설치 확인**:
+   ```bash
+   npm list -g color-palette-mcp
+   ```
+
+### ❌ EPIPE 오류 (연결 끊김)
+**증상**: `Error: write EPIPE` 로그에 표시
+
+**해결방법**:
+- Claude Desktop 완전 종료 후 재시작
+- 설정 파일 구문 오류 확인 (JSON 형식 검증)
+
+### ❌ 색상이 제대로 생성되지 않는 경우
+- 헥스 코드 형식 확인 (`#000000` 또는 `#000` 형태)
 - 유효한 색상 값인지 확인
+- 브랜드 컬러는 너무 어두우거나 밝지 않게 (중간 톤 권장)
+
+### 🔍 디버깅 로그 확인
+**macOS**: `~/Library/Logs/Claude/mcp*.log`  
+**Windows**: `%LOCALAPPDATA%\Claude\logs\mcp*.log`
+
+### 📞 추가 도움이 필요하면
+[GitHub Issues](https://github.com/ppower-dev/color-palette-mcp/issues)에 다음 정보와 함께 문의:
+- 운영체제 및 Claude 버전
+- `npm config get prefix` 결과
+- 설정 파일 내용
+- 오류 로그
 
 
 ## 기여하기

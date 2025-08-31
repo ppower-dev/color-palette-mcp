@@ -1,5 +1,6 @@
 import type { ProjectColors, ProjectType } from '../types/index.js';
 import { adjustLightness, adjustSaturation, rotateHue, hexToHsl } from './color-utils.js';
+import { ColorInferenceEngine } from './color-inference.js';
 
 // 프로젝트별 색상 생성기
 export function generateProjectColors(
@@ -16,6 +17,40 @@ export function generateProjectColors(
   };
 
   return generators[projectType](primaryColor, customNeeds);
+}
+
+// 새로운 동적 프로젝트 색상 생성기 (자연어 기반)
+export function generateDynamicProjectColors(
+  projectDescription: string,
+  primaryColor: string,
+  maxColors?: number
+): ProjectColors {
+  // AI 추론 엔진으로 색상 생성
+  const inferredColors = ColorInferenceEngine.inferColorsFromText(
+    projectDescription, 
+    primaryColor, 
+    maxColors || 15
+  );
+  
+  const colors: ProjectColors = {};
+  
+  // 추론된 색상들을 ProjectColors 형태로 변환
+  for (const inferred of inferredColors) {
+    colors[inferred.name] = inferred.color;
+    
+    // 추론 과정을 주석으로 기록 (개발자용)
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`🎨 ${inferred.name}: ${inferred.color} (${inferred.reasoning})`);
+    }
+  }
+  
+  // 기본적인 색상이 없다면 추가
+  if (Object.keys(colors).length === 0) {
+    colors['primary-accent'] = adjustSaturation(primaryColor, 20);
+    colors['secondary-accent'] = rotateHue(primaryColor, 60);
+  }
+  
+  return colors;
 }
 
 // 이커머스용 컬러들

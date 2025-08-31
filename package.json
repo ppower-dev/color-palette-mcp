@@ -1,6 +1,6 @@
 {
   "name": "color-palette-mcp",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "MCP server for intelligent color palette generation and management",
   "license": "MIT",
   "author": "ppower-dev",
@@ -15,11 +15,13 @@
     "color-palette-mcp": "dist/index.js"
   },
   "files": [
-    "dist"
+    "dist",
+    "scripts"
   ],
   "scripts": {
     "build": "tsc && shx chmod +x dist/*.js",
     "prepare": "npm run build",
+    "postinstall": "node scripts/postinstall.js",
     "watch": "tsc --watch",
     "test": "jest --config=jest.config.cjs --coverage",
     "dev": "tsx watch src/index.ts"

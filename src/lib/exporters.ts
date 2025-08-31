@@ -195,3 +195,92 @@ export function exportToReactNative(palette: BasePalette, projectColors?: Projec
 
   return lines.join('\n');
 }
+
+// 동적 색상을 위한 내보내기 함수들
+export function exportToDynamicCSS(colors: Record<string, string>, primaryColor: string): string {
+  let css = `:root {\n`;
+  
+  // 동적 색상들을 CSS 변수로 변환
+  for (const [name, color] of Object.entries(colors)) {
+    const { r, g, b } = hexToRgb(color);
+    css += `  --color-${name}: ${r} ${g} ${b};\n`;
+  }
+  
+  css += `\n  /* RGB 헥스 값들 */\n`;
+  for (const [name, color] of Object.entries(colors)) {
+    css += `  --color-${name}-hex: ${color};\n`;
+  }
+  
+  css += `}\n\n`;
+  css += `/* 사용 예시:\n`;
+  css += ` * background-color: rgb(var(--color-${Object.keys(colors)[0] || 'primary'}));\n`;
+  css += ` * color: var(--color-${Object.keys(colors)[1] || 'text'}-hex);\n`;
+  css += ` */`;
+  
+  return css;
+}
+
+export function exportToDynamicTailwind(colors: Record<string, string>): string {
+  const config = {
+    theme: {
+      extend: {
+        colors: {} as Record<string, string>
+      }
+    }
+  };
+  
+  // 동적 색상들을 Tailwind 형태로 변환
+  for (const [name, color] of Object.entries(colors)) {
+    config.theme.extend.colors[name.replace(/-/g, '')] = color;
+  }
+  
+  return `// tailwind.config.js\nmodule.exports = ${JSON.stringify(config, null, 2)};`;
+}
+
+export function exportToDynamicSCSS(colors: Record<string, string>): string {
+  let scss = `// 동적 생성된 SCSS 색상 변수들\n`;
+  
+  for (const [name, color] of Object.entries(colors)) {
+    scss += `$${name}: ${color};\n`;
+  }
+  
+  scss += `\n// 사용 예시:\n`;
+  scss += `// .my-button {\n`;
+  scss += `//   background-color: $${Object.keys(colors)[0] || 'primary'};\n`;
+  scss += `//   color: $${Object.keys(colors)[1] || 'text'};\n`;
+  scss += `// }\n`;
+  
+  return scss;
+}
+
+export function exportToDynamicFigma(colors: Record<string, string>): string {
+  const figmaTokens = {
+    color: {} as Record<string, { value: string; type: string }>
+  };
+  
+  for (const [name, color] of Object.entries(colors)) {
+    figmaTokens.color[name] = {
+      value: color,
+      type: "color"
+    };
+  }
+  
+  return JSON.stringify(figmaTokens, null, 2);
+}
+
+export function exportToDynamicReactNative(colors: Record<string, string>): string {
+  let rn = `// React Native 색상 상수\n`;
+  rn += `export const Colors = {\n`;
+  
+  for (const [name, color] of Object.entries(colors)) {
+    const camelCaseName = name.replace(/-([a-z])/g, (g) => g[1].toUpperCase());
+    rn += `  ${camelCaseName}: '${color}',\n`;
+  }
+  
+  rn += `};\n\n`;
+  rn += `// 사용 예시:\n`;
+  rn += `// import { Colors } from './colors';\n`;
+  rn += `// <View style={{ backgroundColor: Colors.${Object.keys(colors)[0]?.replace(/-([a-z])/g, (g) => g[1].toUpperCase()) || 'primary'} }} />\n`;
+  
+  return rn;
+}
