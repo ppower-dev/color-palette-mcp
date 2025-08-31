@@ -21,7 +21,7 @@
 npm install -g color-palette-mcp
 ```
 
-### 2. Claude Desktop 연결 (권장 방법 🚀)
+### 2. Claude Desktop 연결
 Claude Desktop 설정 파일을 수정하세요:
 
 **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`  
@@ -52,7 +52,7 @@ color-palette-mcp --help
 
 설정 후 Claude Desktop을 재시작하면 색상 팔레트 도구들이 활성화됩니다.
 
-### 3. Cursor 연결 (권장: npx 방법)
+### 3. Cursor 연결
 Cursor 설정 파일에 다음과 같이 추가하세요:
 
 ```json
@@ -86,7 +86,7 @@ Cursor 설정 파일에 다음과 같이 추가하세요:
 #22c55e 색상으로 이커머스 프로젝트용 팔레트 생성해줘 (할인가격, 재고상태 색상 포함)
 ```
 
-### 🤖 AI 동적 색상 생성 (NEW!)
+### AI 동적 색상 생성 (NEW!)
 어떤 종류의 프로젝트든 자연어로 설명하면 AI가 맞춤 색상을 자동 생성합니다:
 
 ```
