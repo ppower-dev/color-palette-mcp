@@ -20,28 +20,15 @@
 ```bash
 npm install -g color-palette-mcp
 ```
-설치 완료 후 올바른 설정 경로가 자동으로 표시됩니다! 📋
 
-### 2. Claude Desktop 연결
+### 2. Claude Desktop 연결 (권장 방법 🚀)
 Claude Desktop 설정 파일을 수정하세요:
 
 **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`  
 **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`  
 **Linux**: `~/.config/Claude/claude_desktop_config.json`
 
-#### 방법 1: 절대 경로 사용 (권장 ✅)
-설치 후 표시되는 절대 경로를 사용:
-```json
-{
-  "mcpServers": {
-    "color-palette": {
-      "command": "/your/npm/global/bin/color-palette-mcp"
-    }
-  }
-}
-```
-
-#### 방법 2: npx 사용 (간편함 ⚡)
+#### 추천: npx 사용 (PATH 문제 없음! ⚡)
 ```json
 {
   "mcpServers": {
@@ -52,42 +39,39 @@ Claude Desktop 설정 파일을 수정하세요:
   }
 }
 ```
+**이 방법의 장점:**
+- ✅ 경로 문제 완전 해결
+- ✅ 항상 최신 버전 사용  
+- ✅ 모든 운영체제에서 동일하게 작동
 
-### 설정 경로 찾기 💡
-올바른 경로를 찾으려면:
+#### 대안: 절대 경로 사용 (고급 사용자용)
 ```bash
-# macOS/Linux
-which color-palette-mcp
-
-# Windows  
-where color-palette-mcp
-
-# npm 전역 경로 확인
-npm config get prefix
+# 설정 안내 보기
+color-palette-mcp --help
 ```
 
 설정 후 Claude Desktop을 재시작하면 색상 팔레트 도구들이 활성화됩니다.
 
-### 3. Cursor 연결
-Cursor에서 사용하려면 Cursor 설정에서 MCP 서버를 추가하세요:
+### 3. Cursor 연결 (권장: npx 방법)
+Cursor 설정 파일에 다음과 같이 추가하세요:
 
-**설정 방법**:
-1. Cursor > Settings > Extensions > MCP
-2. 새 MCP 서버 추가:
-   - **Name**: color-palette
-   - **Command**: color-palette-mcp
-   - **Args**: (비워둠)
-
-또는 Cursor 설정 파일에 직접 추가:
 ```json
 {
   "mcp.servers": {
     "color-palette": {
-      "command": "color-palette-mcp"
+      "command": "npx",
+      "args": ["color-palette-mcp"]
     }
   }
 }
 ```
+
+**GUI 설정 방법**:
+1. Cursor > Settings > Extensions > MCP  
+2. 새 MCP 서버 추가:
+   - **Name**: color-palette
+   - **Command**: npx  
+   - **Args**: color-palette-mcp
 
 ## 사용법
 
@@ -256,14 +240,7 @@ npm run dev       # 개발 서버 실행
 **증상**: `spawn color-palette-mcp ENOENT` 또는 서버 연결 실패
 
 **해결방법**:
-1. **절대 경로 확인**: 
-   ```bash
-   which color-palette-mcp
-   # 또는 npm config get prefix
-   ```
-   결과를 설정 파일의 `command`에 정확히 입력
-
-2. **npx 방법 사용**:
+1. **🚀 npx 방법 사용 (가장 확실함)**:
    ```json
    {
      "mcpServers": {
@@ -274,10 +251,16 @@ npm run dev       # 개발 서버 실행
      }
    }
    ```
+   이 방법은 PATH 문제를 완전히 우회합니다.
 
-3. **설치 확인**:
+2. **패키지 설치 확인**:
    ```bash
    npm list -g color-palette-mcp
+   ```
+
+3. **절대 경로가 필요한 경우**:
+   ```bash
+   color-palette-mcp --help
    ```
 
 ### ❌ EPIPE 오류 (연결 끊김)

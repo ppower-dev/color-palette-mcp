@@ -1,6 +1,6 @@
 {
   "name": "color-palette-mcp",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "MCP server for intelligent color palette generation and management",
   "license": "MIT",
   "author": "ppower-dev",

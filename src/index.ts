@@ -412,14 +412,78 @@ function generateAllComponents(): string {
   return ['button', 'card', 'form', 'navigation'].map(comp => generateComponent(comp)).join('\n');
 }
 
-// 서버 실행
-async function runServer() {
+// 도움말 표시 함수
+async function showSetupHelp() {
+  const { execSync } = await import('child_process');
+  const { platform } = await import('os');
+  
+  try {
+    const globalPrefix = execSync('npm config get prefix', { encoding: 'utf8' }).trim();
+    const binPath = `${globalPrefix}/bin/color-palette-mcp`;
+    
+    const configPaths = {
+      darwin: '~/Library/Application Support/Claude/claude_desktop_config.json',
+      win32: '%APPDATA%\\Claude\\claude_desktop_config.json',
+      linux: '~/.config/Claude/claude_desktop_config.json'
+    };
+    
+    const configPath = configPaths[platform() as keyof typeof configPaths] || configPaths.linux;
+    
+    console.log('\n🎨 Color Palette MCP 설정 안내');
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    console.log('✅ MCP 설정을 위해 다음 경로를 사용하세요:');
+    console.log(`\n📍 절대 경로: ${binPath}\n`);
+    console.log('📝 Claude Desktop 설정 파일 위치:');
+    console.log(`   ${configPath}\n`);
+    console.log('⚙️  설정 예시:');
+    console.log('┌─────────────────────────────────────────┐');
+    console.log('│ {                                       │');
+    console.log('│   "mcpServers": {                       │');
+    console.log('│     "color-palette": {                  │');
+    console.log(`│       "command": "${binPath}"          │`);
+    console.log('│     }                                   │');
+    console.log('│   }                                     │');
+    console.log('│ }                                       │');
+    console.log('└─────────────────────────────────────────┘\n');
+    console.log('💡 대안 방법 (npx 사용):');
+    console.log('┌─────────────────────────────────────────┐');
+    console.log('│ {                                       │');
+    console.log('│   "mcpServers": {                       │');
+    console.log('│     "color-palette": {                  │');
+    console.log('│       "command": "npx",                 │');
+    console.log('│       "args": ["color-palette-mcp"]     │');
+    console.log('│     }                                   │');
+    console.log('│   }                                     │');
+    console.log('│ }                                       │');
+    console.log('└─────────────────────────────────────────┘\n');
+    console.log('🔄 설정 후 Claude Desktop을 재시작하세요!');
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
+    
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error('⚠️  경로 확인 중 오류가 발생했습니다:', errorMessage);
+    console.log('\n💡 수동 설정을 위해 다음 명령어를 실행하세요:');
+    console.log('   which color-palette-mcp');
+    console.log('   (Windows: where color-palette-mcp)\n');
+  }
+}
+
+// 메인 함수
+async function main() {
+  // 명령행 인수 처리
+  const args = process.argv.slice(2);
+  if (args.includes('--help') || args.includes('-h') || args.includes('--setup')) {
+    await showSetupHelp();
+    process.exit(0);
+  }
+
+  // 서버 실행
   const transport = new StdioServerTransport();
   await server.connect(transport);
   console.error("Color Palette MCP Server running on stdio");
 }
 
-runServer().catch((error) => {
+main().catch((error) => {
   console.error("Fatal error running server:", error);
   process.exit(1);
 });
